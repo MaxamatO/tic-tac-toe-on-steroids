@@ -17,6 +17,8 @@ class State():
         self.errors = {'place_error': "Place is already taken.", 'undo_error':"No moves to undo."}
         self.wins = {'x': 'Cross wins', 'o': 'Circle wins', 'draw': "It's a draw."}
         self.winner = ''
+        self.index = None
+
         
     def makeMove(self, pos, SQ_SIZE):
         ''' Making a move is made by changing blank space in board to either 'x' or 'o' '''
@@ -26,7 +28,6 @@ class State():
             if self.board[row][col] == '.':
                 self.board[row][col] = self.sign
                 self.move_logs.append((row, col))
-                print(self.move_logs)
                 self.changeSign()
         except:
             self.errors['place_error']
@@ -55,25 +56,30 @@ class State():
             
     def checkHorizontaly(self):
         ''' Function used for checking if someone won by checking every row. '''
+        self.index = 0
         for r in self.board:
             if len(set(r)) == 1 and '.' not in r: # Taking a list of signs in next rows and making it a set. !! This method is used in every win-checking function. !! 
                 self.winner = r[0]
                 return True
+            self.index += 1
 
     def checkVerticaly(self):
         ''' Function used for checking if someone won by checking every column. ''' 
-        first_row = [item[0] for item in self.board]
-        second_row = [item[1] for item in self.board]
-        third_row = [item[2] for item in self.board]
+        first_col = [item[0] for item in self.board]
+        second_col = [item[1] for item in self.board]
+        third_col = [item[2] for item in self.board]
 
-        if len(set(first_row)) == 1 and '.' not in first_row:
+        if len(set(first_col)) == 1 and '.' not in first_col:
             self.winner = self.board[0][0]
+            self.index = 0
             return True
-        if len(set(second_row)) == 1 and '.' not in second_row:
+        if len(set(second_col)) == 1 and '.' not in second_col:
             self.winner = self.board[0][1]
+            self.index = 1
             return True
-        if len(set(third_row)) == 1 and '.' not in third_row:
+        if len(set(third_col)) == 1 and '.' not in third_col:
             self.winner = self.board[0][2]
+            self.index = 2
             return True
 
     def checkDiagonally(self):
@@ -85,9 +91,11 @@ class State():
         
         if len(set(l_to_r)) == 1 and '.' not in l_to_r:
             self.winner = self.board[0][0]
+            self.index = 0
             return True
         elif len(set(r_to_l)) == 1 and '.' not in r_to_l:
             self.winner = self.board[0][2]
+            self.index = 2
             return True
 
     def isDraw(self):
@@ -107,8 +115,7 @@ class State():
             n = self.move_logs.pop()
             self.board[n[0]][n[1]] = '.'
             self.x_to_move = not self.x_to_move
-            print(n)
-            print(self.board)
+            
 
     def canMove(self):
         """ Function checking if next move is possible  """
@@ -117,4 +124,11 @@ class State():
         else:
             return True
 
-    
+    def restart(self):
+        self.move_logs.clear()
+        self.board = [['.', '.', '.'],
+                      ['.', '.', '.'],
+                      ['.', '.', '.']
+        ]
+
+        
