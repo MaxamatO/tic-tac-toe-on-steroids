@@ -11,6 +11,7 @@ import pygame
 import engine 
 from pygame import freetype
 
+
 # Initialize pygame dir
 pygame.init()
 
@@ -28,7 +29,6 @@ gameDisplay = pygame.display.set_mode((WIDTH, HEIGHT))
 
 # pygame.
 
-
 class Btn():
     def __init__(self):
         self.width = WIDTH
@@ -36,6 +36,20 @@ class Btn():
         self.color = (145,145,145,150)
         self.yes_surface, self.y_rect= GAME_FONT.render("Yes",  (white))
         self.no_surface, self.n_rect = GAME_FONT.render("No",  (white))
+
+    def askForType(self):
+        screen_rect = gameDisplay.get_rect()
+
+        text_surface, rect = GAME_FONT.render("What type of game would you like?: ", (white))
+
+        see_through = pygame.Surface((self.width, self.height)).convert_alpha()
+        see_through.fill(self.color)
+        see_through_rect = see_through.get_rect(midleft=(0, 300))
+
+        gameDisplay.blit(see_through, see_through_rect)
+        gameDisplay.blit(text_surface, (150, 250))
+        gameDisplay.blit(self.yes_surface, (250, 310))
+        gameDisplay.blit(self.no_surface, (350, 310))
 
     def askForRestart(self):
         """
@@ -54,7 +68,7 @@ class Btn():
         gameDisplay.blit(self.yes_surface, (250, 310))
         gameDisplay.blit(self.no_surface, (350, 310))
 
-    def yesNo(self, pos):
+    def yesNo_restart(self, pos):
         """
         Taking user input and determining if he wants to restart
         """
@@ -64,14 +78,12 @@ class Btn():
         elif pos[0] in range(350, 390) and pos[1] in range(310, 335):
             sys.exit()
 
-
-
 def loadImgs():
     '''
     Loads images
     '''
-    IMGS['x'] = pygame.transform.scale(pygame.image.load('imgs/X.jpg'), (SQ_SIZE, SQ_SIZE))
-    IMGS['o'] = pygame.transform.scale(pygame.image.load('imgs/o.svg'), (SQ_SIZE, SQ_SIZE))
+    IMGS[1] = pygame.transform.scale(pygame.image.load('imgs/X.jpg'), (SQ_SIZE, SQ_SIZE))
+    IMGS[-1] = pygame.transform.scale(pygame.image.load('imgs/o.svg'), (SQ_SIZE, SQ_SIZE))
 
 def displayMessages():
     """
@@ -110,7 +122,7 @@ def displayBoard():
     # Loop through 2D array with board to check for any sign placements
     for r in range(len(eng.board)):
         for c in range(len(eng.board[r])):
-            if eng.board[c][r] != '.': 
+            if eng.board[c][r] != 0: 
                 gameDisplay.blit(IMGS[eng.board[c][r]], (r*SQ_SIZE, c*SQ_SIZE))
             else:
                 pygame.draw.rect(gameDisplay, white,[SQ_SIZE*r, SQ_SIZE*c, SQ_SIZE, SQ_SIZE])
@@ -138,28 +150,31 @@ def main():
     Main function used to run the whole program
     '''
     button = Btn()
+    minimax = engine.MiniMax()
     running = True
     clock = pygame.time.Clock()
     gameDisplay.fill(white)
     loadImgs()
+    
     while running:
         for event in pygame.event.get():
-            pos = pygame.mouse.get_pos()
             
             if event.type == pygame.QUIT:
                 running = False
+                sys.exit()
             elif event.type == pygame.MOUSEBUTTONDOWN: 
+                pos = pygame.mouse.get_pos()
+                
                 if event.button == 1:
                     if eng.canMove(): 
-                        eng.makeMove(pos, SQ_SIZE) 
+                        minimax.ai_move()
+                        # eng.makeMove(pos, eng.x_to_move) 
                     if eng.checkWinner():
-                        button.yesNo(pos)
+                        button.yesNo_restart(pos)
             elif event.type == pygame.KEYDOWN: 
-                if event.key == pygame.K_z: 
+                if event.key == pygame.K_z:
                     eng.undo()
                     gameDisplay.fill(white)
-                    eng.changeSign()
-
         state()
         clock.tick(FPS)
         pygame.display.update()
