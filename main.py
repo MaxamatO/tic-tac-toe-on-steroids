@@ -10,6 +10,7 @@ import sys
 import pygame
 import engine 
 from pygame import freetype
+import time
 
 
 # Initialize pygame dir
@@ -91,9 +92,9 @@ def displayMessages():
     """
     button = Btn()
     # Display message taken from engine --
-    if eng.checkWinner():
+    if eng.winner != '':
         text_surface, rect  = GAME_FONT.render(eng.wins[eng.winner], (white))
-        drawWinnerLine()
+        # drawWinnerLine()
         button.askForRestart()
     else:
         text_surface, rect = GAME_FONT.render(eng.message[eng.sign], (white))
@@ -103,16 +104,16 @@ def drawWinnerLine():
     """
     Have no idea how to do it yet 
     """
-    if eng.checkWinner():
-        if eng.checkHorizontaly():
-            pygame.draw.line(gameDisplay, red, (0, (SQ_SIZE*eng.index)+100), (WIDTH, (SQ_SIZE*eng.index)+100), 4)
-        elif eng.checkVerticaly():
-            pygame.draw.line(gameDisplay, red, ((SQ_SIZE*eng.index)+100, 0), ((SQ_SIZE*eng.index)+100, HEIGHT-100), 4)
-        elif eng.checkDiagonally():
+    if eng.checkWinner(eng.board):
+        if eng.checkHorizontaly(eng.board):
+            pygame.draw.line(gameDisplay, red, (0, (SQ_SIZE*eng.index)+100), (WIDTH, (SQ_SIZE*eng.index)+100), 6)
+        elif eng.checkVerticaly(eng.board):
+            pygame.draw.line(gameDisplay, red, ((SQ_SIZE*eng.index)+100, 0), ((SQ_SIZE*eng.index)+100, HEIGHT-100), 6)
+        elif eng.checkDiagonally(eng.board):
             if eng.index == 0:
-                pygame.draw.line(gameDisplay, red, (SQ_SIZE*eng.index, 0), (WIDTH, HEIGHT-100), 4)
+                pygame.draw.line(gameDisplay, red, (SQ_SIZE*eng.index, 0), (WIDTH, HEIGHT-100), 6)
             elif eng.index == 2:
-                pygame.draw.line(gameDisplay, red, (WIDTH, 0), (0, HEIGHT-100), 4)
+                pygame.draw.line(gameDisplay, red, (WIDTH, 0), (0, HEIGHT-100), 6)
 
 def displayBoard():
     '''
@@ -150,7 +151,6 @@ def main():
     Main function used to run the whole program
     '''
     button = Btn()
-    minimax = engine.MiniMax()
     running = True
     clock = pygame.time.Clock()
     gameDisplay.fill(white)
@@ -158,23 +158,26 @@ def main():
     
     while running:
         for event in pygame.event.get():
-            
             if event.type == pygame.QUIT:
                 running = False
                 sys.exit()
+            
+            if eng.x_to_move:   
+                eng.ai_move() 
             elif event.type == pygame.MOUSEBUTTONDOWN: 
                 pos = pygame.mouse.get_pos()
-                
                 if event.button == 1:
-                    if eng.canMove(): 
-                        minimax.ai_move()
-                        # eng.makeMove(pos, eng.x_to_move) 
-                    if eng.checkWinner():
+                    if eng.canMove(eng.board): 
+                        eng.makeMove(pos, eng.x_to_move)
+                    if eng.winner != '':
                         button.yesNo_restart(pos)
+                    
             elif event.type == pygame.KEYDOWN: 
                 if event.key == pygame.K_z:
                     eng.undo()
                     gameDisplay.fill(white)
+            if eng.checkWinner(eng.board):
+                drawWinnerLine()
         state()
         clock.tick(FPS)
         pygame.display.update()
