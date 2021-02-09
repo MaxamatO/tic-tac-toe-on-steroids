@@ -30,7 +30,6 @@ class State():
         
     def makeMove(self, pos, x_to_move, SQ_SIZE=200):
         ''' Making a move is made by changing blank space in board to either 'x' or 'o' '''
-        
         try:
             y = pos[1]//SQ_SIZE
             x = pos[0]//SQ_SIZE
@@ -70,7 +69,6 @@ class State():
             self.winner = 0
 
        
-        
     def checkHorizontaly(self, state):
         ''' Function used for checking if someone won by checking every row. '''
         self.index = 0
@@ -132,7 +130,7 @@ class State():
             self.board[n[0]][n[1]] = 0
             nd = self.move_logs.pop()
             self.board[nd[0]][nd[1]] = 0
-            self.changeSign()
+            self.winner = ''
 
     def canMove(self, state):
         """ Function checking if next move is possible  """
@@ -154,6 +152,9 @@ class State():
     '''MiniMax part'''
 
     def evaluate(self, state):
+        '''
+        Evaluate best move based on score
+        '''
         # whoWon = self.move_logs[-1] if len(self.move_logs) != 0 else (0,0)
         # player = self.board[whoWon[0]][whoWon[1]]
         if self.wins_cases(state, self.COMP):
@@ -165,6 +166,10 @@ class State():
         return score
 
     def ai_move(self):
+        '''
+        Ai makes move, if depth is 0 (blank board) it's random
+        else it minimax's it
+        '''
         depth = len(self.getEmptyIndexes(self.board))
         if depth == 0 or self.game_over(self.board):
             return 
@@ -181,6 +186,9 @@ class State():
         
 
     def getEmptyIndexes(self, state):
+        '''
+        Takes a list of possible moves to make
+        '''
         emptyIndexes = []
         for x, row in enumerate(state):
             for y, cell in enumerate(row):
@@ -189,6 +197,9 @@ class State():
         return emptyIndexes
     
     def set_move(self, x, y, player):
+        '''
+        Places a sign at board
+        '''
         if self.valid_move(x, y):
             self.board[x][y] = player
             self.changeSign()
@@ -198,12 +209,18 @@ class State():
             return False
 
     def valid_move(self, x, y):
+        '''
+        Checks if wanted move is possible
+        '''
         if [x, y] in self.getEmptyIndexes(self.board):
             return True
         else:
             return False
 
     def wins_cases(self, state, player):
+        '''
+        Takes all possible wins and checks if any position wins
+        '''
         win_state = [
             [state[0][0], state[0][1], state[0][2]],
             [state[1][0], state[1][1], state[1][2]],
