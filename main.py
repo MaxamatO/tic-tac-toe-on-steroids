@@ -2,23 +2,19 @@
 This file is responsible to take user input, draw things, display board etc.
 '''
 '''
- TODO In this app: add MiniMax algorithm, create choice about type of game (PvP, PvPC),
-    ask for another game at the end, Best Of 3.
+ TODO In this app: Best Of 3.
 '''
 
 import sys
 import pygame
 import engine 
 from pygame import freetype
-import time
-
 
 # Initialize pygame dir
 pygame.init()
 
 # Define constant parameters of our game 
 WIDTH, HEIGHT = 600,700
-RECT_WIDTH, RECT_HEIGHT = 600, 100
 DIMENSIONS = 3 # Number of cells used in both x and y axis
 SQ_SIZE = (WIDTH) // DIMENSIONS # Size of a single square (here 200x200)
 FPS = 20
@@ -28,8 +24,6 @@ GAME_FONT = pygame.freetype.SysFont("arial", 32)
 eng = engine.State()
 gameDisplay = pygame.display.set_mode((WIDTH, HEIGHT))
 
-# pygame.
-
 class Btn():
     def __init__(self):
         self.width = WIDTH
@@ -37,27 +31,28 @@ class Btn():
         self.color = (145,145,145,150)
         self.yes_surface, self.y_rect= GAME_FONT.render("Yes",  (white))
         self.no_surface, self.n_rect = GAME_FONT.render("No",  (white))
+        self.ai_surface, self.a_rect= GAME_FONT.render("Player vs Ai",  (white))
+        self.hum_surface, self.h_rect = GAME_FONT.render("Player vs Player",  (white))
 
     def askForType(self):
-        screen_rect = gameDisplay.get_rect()
-
-        text_surface, rect = GAME_FONT.render("What type of game would you like?: ", (white))
+        '''
+        Asking player wheter he wants to play PvsP or PvsAi
+        '''
+        text_surface, rect = GAME_FONT.render("Choose a type of a game: ", (white))
 
         see_through = pygame.Surface((self.width, self.height)).convert_alpha()
         see_through.fill(self.color)
         see_through_rect = see_through.get_rect(midleft=(0, 300))
 
         gameDisplay.blit(see_through, see_through_rect)
-        gameDisplay.blit(text_surface, (150, 250))
-        gameDisplay.blit(self.yes_surface, (250, 310))
-        gameDisplay.blit(self.no_surface, (350, 310))
+        gameDisplay.blit(text_surface, (110, 250))
+        gameDisplay.blit(self.ai_surface, (95, 310))
+        gameDisplay.blit(self.hum_surface, (330, 310))
 
     def askForRestart(self):
         """
         Create pop up ending rectangle 
         """
-        screen_rect = gameDisplay.get_rect()
-
         text_surface, rect = GAME_FONT.render("Do you want to restart?: ", (white))
 
         see_through = pygame.Surface((self.width, self.height)).convert_alpha()
@@ -79,6 +74,18 @@ class Btn():
         elif pos[0] in range(350, 390) and pos[1] in range(310, 335):
             sys.exit()
 
+    def choose_type(self,pos):
+        if pos[0] in range(95, 260) and pos[1] in range(310, 335):
+            eng.type = 1
+            pygame.display.set_caption('Tic Tac Toe - Ai version')
+            return True
+        elif pos[0] in range(330, 560) and pos[1] in range(310, 335):
+            eng.type = -1
+            pygame.display.set_caption('Tic Tac Toe - Human version')
+
+            return True
+        
+
 def loadImgs():
     '''
     Loads images
@@ -90,7 +97,7 @@ def displayMessages():
     """
     Displays errors, messages, winners at the bottom of the screen
     """
-    button = Btn()
+ 
     # Display message taken from engine --
     if eng.winner != '':
         text_surface, rect  = GAME_FONT.render(eng.wins[eng.winner], (white))
@@ -146,11 +153,33 @@ def state():
     displayBoard()
     displayMessages()
 
+
+def intro():
+    running = True
+    gameDisplay.fill(white)
+    clock = pygame.time.Clock()
+    state()
+    button.askForType()
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pos = pygame.mouse.get_pos()
+                if button.choose_type(pos):
+                    running = False
+        pygame.display.update()
+        clock.tick(FPS)
+
 def main():
     '''
     Main function used to run the whole program
     '''
-    button = Btn()
+
+    if eng.type == '':
+        intro()
+
     running = True
     clock = pygame.time.Clock()
     gameDisplay.fill(white)
@@ -161,9 +190,6 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
                 sys.exit()
-            
-            if eng.x_to_move:   
-                eng.ai_move() 
             elif event.type == pygame.MOUSEBUTTONDOWN: 
                 pos = pygame.mouse.get_pos()
                 if event.button == 1:
@@ -171,18 +197,23 @@ def main():
                         eng.makeMove(pos, eng.x_to_move)
                     if eng.winner != '':
                         button.yesNo_restart(pos)
-                    
             elif event.type == pygame.KEYDOWN: 
                 if event.key == pygame.K_z:
                     eng.undo()
                     gameDisplay.fill(white)
-            if eng.checkWinner(eng.board):
+        if eng.type == 1 and eng.x_to_move:
+                eng.ai_move()
+        if eng.checkWinner(eng.board):
                 drawWinnerLine()
         state()
-        clock.tick(FPS)
         pygame.display.update()
+        clock.tick(FPS)
 
 
 # Starting program
 if __name__ == "__main__":
+    button = Btn()
+    
+   
     main()
+    

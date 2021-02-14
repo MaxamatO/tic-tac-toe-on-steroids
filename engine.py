@@ -1,7 +1,7 @@
-import random
+
 from random import choice
 from math import inf as infinity
-import time
+
 class State():
     """
     Main engine class used to checking valid moves, checking board, minimax algorithm. This class is mainly to get the game working.
@@ -25,20 +25,29 @@ class State():
         self.HUMAN = -1
         self.COMP = 1
         self.howWon = ''
-
+        self.type = ''
 
         
     def makeMove(self, pos, x_to_move, SQ_SIZE=200):
         ''' Making a move is made by changing blank space in board to either 'x' or 'o' '''
         try:
-            y = pos[1]//SQ_SIZE
-            x = pos[0]//SQ_SIZE
-            if self.board[y][x] == 0:
-                self.board[y][x] = self.HUMAN
-                self.move_logs.append((y, x))
-                self.changeSign()
+            if self.type == 1:
+                if x_to_move:
+                    self.ai_move()
+                else:
+                    self.human_move(pos, SQ_SIZE)
+            else:
+                self.human_move(pos, SQ_SIZE)
         except:
             self.errors['place_error']
+
+    def human_move(self, pos, SQ_SIZE):
+        y = pos[1]//SQ_SIZE
+        x = pos[0]//SQ_SIZE
+        if self.board[y][x] == 0:
+            self.board[y][x] = self.sign
+            self.move_logs.append((y, x))
+            self.changeSign()
 
     def changeSign(self):
         ''' This fucntion is called when you have to change the player that is supposed to move. For example: after move, when undo. '''
@@ -148,6 +157,7 @@ class State():
         self.sign = 1
         self.winner = ''
         self.x_to_move = True
+        self.type = ''
 
     '''MiniMax part'''
 
@@ -155,8 +165,6 @@ class State():
         '''
         Evaluate best move based on score
         '''
-        # whoWon = self.move_logs[-1] if len(self.move_logs) != 0 else (0,0)
-        # player = self.board[whoWon[0]][whoWon[1]]
         if self.wins_cases(state, self.COMP):
             score = +1
         elif self.wins_cases(state, self.HUMAN):
