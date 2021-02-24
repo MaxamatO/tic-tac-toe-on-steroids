@@ -74,8 +74,12 @@ class State():
             elif self.checkDiagonally(state):
                 return True
             
+            
         if len(self.move_logs) == 9:
             self.winner = 0
+
+        
+        
 
        
     def checkHorizontaly(self, state):
@@ -159,7 +163,7 @@ class State():
         self.x_to_move = True
         self.type = ''
 
-    '''MiniMax part'''
+        '''MiniMax part'''
 
     def evaluate(self, state):
         '''

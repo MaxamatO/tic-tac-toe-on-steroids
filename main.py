@@ -18,9 +18,10 @@ WIDTH, HEIGHT = 600,700
 DIMENSIONS = 3 # Number of cells used in both x and y axis
 SQ_SIZE = (WIDTH) // DIMENSIONS # Size of a single square (here 200x200)
 FPS = 20
-white, black, red= (255, 255, 255), (0, 0, 0), (255,0,0)
+white, black, red = (255, 255, 255), (0, 0, 0), (255,0,0)
 IMGS = {} 
 GAME_FONT = pygame.freetype.SysFont("arial", 32) 
+LARGE_FONT = pygame.freetype.SysFont("arial", 60)
 eng = engine.State()
 gameDisplay = pygame.display.set_mode((WIDTH, HEIGHT))
 
@@ -33,6 +34,8 @@ class Btn():
         self.no_surface, self.n_rect = GAME_FONT.render("No",  (white))
         self.ai_surface, self.a_rect= GAME_FONT.render("Player vs Ai",  (white))
         self.hum_surface, self.h_rect = GAME_FONT.render("Player vs Player",  (white))
+        
+
 
     def askForType(self):
         '''
@@ -82,9 +85,8 @@ class Btn():
         elif pos[0] in range(330, 560) and pos[1] in range(310, 335):
             eng.type = -1
             pygame.display.set_caption('Tic Tac Toe - Human version')
-
             return True
-        
+    
 
 def loadImgs():
     '''
@@ -114,14 +116,18 @@ def drawWinnerLine():
     if eng.checkWinner(eng.board):
         if eng.checkHorizontaly(eng.board):
             pygame.draw.line(gameDisplay, red, (0, (SQ_SIZE*eng.index)+100), (WIDTH, (SQ_SIZE*eng.index)+100), 6)
+            
         elif eng.checkVerticaly(eng.board):
             pygame.draw.line(gameDisplay, red, ((SQ_SIZE*eng.index)+100, 0), ((SQ_SIZE*eng.index)+100, HEIGHT-100), 6)
+            
         elif eng.checkDiagonally(eng.board):
             if eng.index == 0:
                 pygame.draw.line(gameDisplay, red, (SQ_SIZE*eng.index, 0), (WIDTH, HEIGHT-100), 6)
+                
             elif eng.index == 2:
                 pygame.draw.line(gameDisplay, red, (WIDTH, 0), (0, HEIGHT-100), 6)
-
+                
+        
 def displayBoard():
     '''
     Displaying 3x3 grid for tic tac toe + additional space for messages \n
@@ -146,13 +152,18 @@ def displayBoard():
     # Draw message box
     pygame.draw.rect(gameDisplay, black, (0, 600, WIDTH, 100))
 
+    # Draw score box
+    pygame.draw.line(gameDisplay, black, (3*SQ_SIZE, 0), (3*SQ_SIZE, HEIGHT), 2)
+    
+
+
 def state():
     """
     Display current game state
     """
+    
     displayBoard()
     displayMessages()
-
 
 def intro():
     running = True
@@ -176,10 +187,9 @@ def main():
     '''
     Main function used to run the whole program
     '''
-
+    
     if eng.type == '':
         intro()
-
     running = True
     clock = pygame.time.Clock()
     gameDisplay.fill(white)
@@ -213,7 +223,5 @@ def main():
 # Starting program
 if __name__ == "__main__":
     button = Btn()
-    
-   
     main()
     
